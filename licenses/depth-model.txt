@@ -1,0 +1,9 @@
+Depth estimation used during offline video production
+
+Model: Depth Anything V2 Small
+Authors: Depth Anything V2 contributors
+Original: https://github.com/DepthAnything/Depth-Anything-V2
+ONNX conversion: https://huggingface.co/onnx-community/depth-anything-v2-small
+License: Apache License 2.0 — https://www.apache.org/licenses/LICENSE-2.0
+
+Model weights are not distributed with this website. The local renderer uses the model to generate house-depth.webp, then creates image-based motion videos using its own inverse-depth reprojection. No DepthFlow code is incorporated.
