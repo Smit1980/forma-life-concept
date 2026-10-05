@@ -1,0 +1,21 @@
+/* Cinematic architecture: controls stay outside the primary sightline. */
+.viewer-layout{grid-template-columns:minmax(0,1fr) 290px;gap:36px}
+.viewer{height:610px;background:#c9d5cb;isolation:isolate}
+.viewer-badge{top:24px;left:26px;right:26px;background:transparent;padding:0;color:#29382e;letter-spacing:.12em;font-size:11px}
+.viewer-badge>span{color:#445346;font-size:10px;letter-spacing:.025em}
+.tour-story{position:absolute;z-index:2;left:26px;right:26px;bottom:76px;pointer-events:none;color:#f4f1e9;text-shadow:0 1px 12px #142a28}
+.tour-kicker{display:block;font-size:8px;letter-spacing:.17em;margin-bottom:9px}
+#tourCaption{font-family:var(--display);font-size:25px;letter-spacing:-.025em}
+.tour-timeline{width:180px;height:2px;background:#f4f1e945;margin-top:14px;overflow:hidden}
+#tourProgress{display:block;height:100%;background:#e7c99e;transform:scaleX(0);transform-origin:left;will-change:transform}
+.view-tools{bottom:18px;padding:3px;border:1px solid #f5f1e566;background:#f2f1e5e8;backdrop-filter:blur(12px);box-shadow:0 5px 25px #142a2818;gap:1px}
+.view-tools button{padding:0 14px;min-height:40px}
+.view-tools button:first-child,.view-tools button:last-child{padding-inline:10px}
+#tour3d{min-width:135px;font-size:10px;letter-spacing:.025em;border-inline:1px solid #22342816}
+#tour3d:disabled{opacity:.5;cursor:default}
+#reset3d{font-size:10px;min-width:66px;border-right:1px solid #22342816}
+.viewer canvas:focus-visible{outline:2px solid #e7c99e}
+.viewer-overlay{background:linear-gradient(#172c2944,#172c2977)}
+@media(max-width:1100px){.viewer-layout{grid-template-columns:minmax(0,1fr) 250px;gap:28px}.viewer{height:540px}}
+@media(max-width:800px){.viewer-layout{grid-template-columns:1fr}.viewer{height:560px}}
+@media(max-width:520px){.viewer{height:420px}.viewer-badge{left:16px;right:16px;top:16px;font-size:9px}.viewer-badge>span{font-size:8px}.tour-story{left:18px;right:18px;bottom:74px}#tourCaption{font-size:22px}.tour-kicker{font-size:7px}.tour-timeline{width:125px}.view-tools{bottom:16px}.view-tools button{padding-inline:10px}#tour3d{min-width:124px}#reset3d{min-width:55px}}
