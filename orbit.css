@@ -1,0 +1,37 @@
+/* Offline architectural orbit: one scene, full 360 degrees. */
+.house360-area{min-width:0}
+.house360-viewport{position:relative;aspect-ratio:4/3;background:#d9ddd2;overflow:hidden;isolation:isolate;touch-action:pan-y pinch-zoom;cursor:grab;border:1px solid #85918335}
+.house360-viewport:active{cursor:grabbing}
+.house360-viewport>img{width:100%;height:100%;object-fit:contain;user-select:none;pointer-events:none}
+.house360-zoom>img{transform:scale(1.3)}
+.house360-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;color:#f6f2e9;background:linear-gradient(#172c2922,#172c2944);text-align:center}
+.house360-overlay>.eyebrow{letter-spacing:.18em;text-shadow:0 1px 8px #182f2a}
+.house360-start{display:grid;justify-items:center;align-content:center;gap:10px;border:1px solid #f5f1e9;background:#f5f1e916;backdrop-filter:blur(6px);color:#fff;min-height:140px;min-width:140px;border-radius:50%}
+.house360-start b{font:400 35px var(--display)}
+.house360-start span{font-size:10px}
+.house360-start:hover{color:#fff;background:#f5f1e935}
+.house360-overlay>p{font-size:10px;color:#faf7f0;text-shadow:0 1px 8px #152a23}
+.house360-corner{position:absolute;top:20px;left:20px;right:20px;display:flex;justify-content:space-between;pointer-events:none;color:#28362c;font-size:10px;letter-spacing:.16em;text-shadow:0 1px 6px #ffffff80}
+.house360-corner span{font-variant-numeric:tabular-nums}
+.house360-controls{padding:20px 0 0}
+.house360-range{display:flex;align-items:center;gap:16px;font-size:9px;color:#d7ded2}
+.house360-range input{width:100%;accent-color:#c59b76;min-height:36px;cursor:ew-resize;margin:0}
+.house360-toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}
+.house360-toolbar button{min-height:44px;padding:8px 12px;border:1px solid #a5b39d66;font-size:10px;color:#eef0e7}
+.house360-toolbar button:hover{border-color:#d9b891;color:#d9b891}
+.house360-toolbar button:disabled{opacity:.45;cursor:default}
+.house360-toolbar button:first-child,.house360-toolbar button:nth-child(3),#house360Fullscreen{font-size:20px;min-width:44px}
+.house360-hint{font-size:9px;color:#b5c0ad;margin-top:16px;line-height:1.7}
+.house360-presets{display:grid;gap:8px;margin-top:14px}
+.house360-presets button{padding:15px 12px;border:1px solid #a5b39d66;color:#f2f1e9;text-align:left;font-size:11px;min-height:48px}
+.house360-presets button[aria-pressed=true]{background:#e5e8dd;color:#25372b;border-color:#e5e8dd}
+.config-panel h3{font-size:32px}
+.house360-area:fullscreen{background:#21362d;width:100vw;height:100vh;padding:16px;display:flex;flex-direction:column;align-items:center}
+.house360-area:fullscreen .house360-viewport{flex:1;min-height:0;width:100%;aspect-ratio:auto;border:0}
+.house360-area:fullscreen .house360-controls{width:min(900px,100%);padding-top:8px}
+.house360-area:fullscreen .house360-hint{margin:8px 0 0}
+@media(max-width:800px){.house360-toolbar{gap:6px}.house360-presets{grid-template-columns:1fr 1fr}.house360-toolbar button{font-size:9px;padding:8px 11px}.house360-hint{font-size:8px}}
+@media(max-width:520px){.house360-corner{top:14px;left:14px;right:14px;font-size:8px}.house360-overlay>.eyebrow{font-size:8px}.house360-overlay{gap:12px}.house360-start{min-width:115px;min-height:115px}.house360-start b{font-size:29px}.house360-presets{grid-template-columns:1fr}.config-panel h3{font-size:32px}.house360-toolbar button:nth-child(4){flex:1}}
+
+.house360-status{font-size:10px;color:#c7d1bd;margin-top:14px;line-height:1.6}
+.house360-viewport:focus-visible{outline:2px solid #d9b891;outline-offset:3px}
