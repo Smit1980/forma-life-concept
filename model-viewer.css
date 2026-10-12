@@ -1,0 +1,43 @@
+/* Architectural model: spatial controls, no timeline or playback. */
+.house360-area{min-width:0;position:relative}
+.house360-viewport{position:relative;aspect-ratio:5/4;min-height:430px;background:#e9e8df;overflow:hidden;isolation:isolate;border-radius:2px;touch-action:pan-y}
+.house360-viewport>img,.house360-viewport>canvas{display:block;width:100%;height:100%;position:absolute;inset:0;object-fit:cover}
+.house360-viewport>img{pointer-events:none}
+.house360-viewport>canvas{cursor:grab;outline:0}
+.house360-viewport>canvas:active{cursor:grabbing}
+.house360-viewport>canvas:focus-visible{outline:3px solid #ad815d;outline-offset:-4px}
+.house360-overlay{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:30px;text-align:center;color:#fff;background:#1e302bab;backdrop-filter:blur(3px)}
+.house360-overlay p{font-size:13px;max-width:340px}
+.house360-overlay .btn{border:1px solid #ffffff77;min-height:48px;color:white}
+.model-loader{width:40px;height:40px;border:1px solid #ffffff40;border-top-color:#fff;border-radius:50%;animation:model-load 1.2s linear infinite}
+@keyframes model-load{to{transform:rotate(360deg)}}
+.house360-viewport[data-state=error] .model-loader{display:none}
+.house360-corner{position:absolute;top:21px;left:22px;right:22px;display:flex;justify-content:space-between;pointer-events:none;color:#405044;font-size:10px;letter-spacing:.12em;z-index:1}
+.house360-corner span{background:#f5f2e9db;padding:7px 10px;font-variant-numeric:tabular-nums}
+.house360-toolbar{display:flex;align-items:center;gap:8px;padding-top:14px}
+.house360-toolbar button{min-width:46px;min-height:46px;color:#eaece2;border:1px solid #a5b39d70;border-radius:2px;font-size:20px;padding:8px 14px}
+.house360-toolbar button:hover{border-color:#dab793;background:#ffffff0b}
+.house360-toolbar button:focus-visible,.house360-presets button:focus-visible{outline:2px solid #d9b891;outline-offset:3px}
+.model-zoom{display:flex;gap:6px}
+#house360Reset{font-size:20px;display:flex;gap:10px;align-items:center;margin-left:auto}
+#house360Reset span{font-size:11px}
+#house360Touch{display:none;font-size:11px;line-height:1.35}
+.house360-status,.house360-hint{color:#cad1c3;font-size:11px;line-height:1.7;margin-top:12px}
+.house360-hint{color:#adbca5;margin-top:6px}
+.mobile-hint{display:none}
+.house360-presets{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:14px}
+.house360-presets button{min-height:46px;text-align:left;padding:12px 10px;border:1px solid #a5b39d70;color:#f1f0e7;font-size:11px}
+.house360-presets button:last-child{grid-column:1/-1}
+.house360-presets button[aria-pressed=true]{color:#23372b;background:#e8e9de}
+.house360-presets button:disabled{opacity:.45;cursor:wait}
+.config-panel h3{font-size:32px}
+.house360-area:fullscreen,.house360-expanded{background:#24392e;width:100vw;height:100dvh;padding:16px;display:flex;flex-direction:column;z-index:1000}
+.house360-expanded{position:fixed;inset:0}
+.model-expanded{overflow:hidden}
+.house360-area:fullscreen .house360-viewport,.house360-expanded .house360-viewport{flex:1;width:100%;aspect-ratio:auto;min-height:0}
+.house360-area:fullscreen .house360-status,.house360-expanded .house360-status{display:none}
+.house360-area:fullscreen .house360-hint,.house360-expanded .house360-hint{margin:8px 0 0}
+[hidden]{display:none!important}
+@media(max-width:900px){.house360-viewport{min-height:400px}.house360-presets{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.house360-viewport{min-height:370px;aspect-ratio:1/1.1}.house360-corner{top:12px;left:12px;right:12px;font-size:9px}.house360-toolbar{flex-wrap:wrap;gap:7px}#house360Touch{display:block;flex:1 0 100%;background:#e9eade;color:#25382e;font-size:12px}#house360Touch[aria-pressed=true]{background:#bf9979}.desktop-hint{display:none}.mobile-hint{display:inline}.house360-viewport.touch-active{outline:2px solid #cba67f;outline-offset:3px}.house360-status,.house360-hint{font-size:10px}.config-panel h3{font-size:29px}.house360-presets button{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.model-loader{animation:none;border-color:#fff}}

@@ -1,5 +1,13 @@
 # Architecture 360 — asset provenance
 
+## Interactive model edition (12 October 2026)
+
+The current site uses `assets/models/atria-house.glb`, exported from the authored Blender scene, and a real Three.js WebGL camera. Geometry, UVs and physically based materials are in the GLB; no frame sequence or video is used by the interactive viewer. The HDR environment is the CC0 Kloofendal source listed below. Three.js r180 and its OrbitControls, GLTFLoader, HDRLoader and BufferGeometryUtils addons are shipped locally under `licenses/three-MIT.txt`. Source: https://github.com/mrdoob/three.js/tree/r180
+
+The retained WebP orbit frames below belong to the previous edition and now supply only a loading/error poster. Dense landscape geometry was excluded from the real-time model; the architectural concept is not a measured construction model. Model details and export metrics: `assets/models/atria-house-report.json`.
+
+## Previous rendered edition
+
 The house geometry is an authored architectural concept based on the project's source illustration. The back elevation is invented design, not factual reconstruction. Offline Blender Cycles renders are delivered as static WebP frames. Blender is GPL; there is no Blender runtime embedded in this website.
 
 Materials and landscape sources (CC0; free for commercial use):
