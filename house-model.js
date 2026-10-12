@@ -22,6 +22,65 @@ export function setupHouse360() {
   const homeTheta = -.55, homePhi = 1.13;
   const viewAngles = {front:[0,1.25], right:[Math.PI/2,1.25], back:[Math.PI,1.25], left:[-Math.PI/2,1.25], top:[homeTheta,.18]};
 
+  function seededNoise(seed) {
+    let value = seed >>> 0;
+    return () => {
+      value = (value * 1664525 + 1013904223) >>> 0;
+      return value / 4294967296;
+    };
+  }
+  function groundTexture(kind) {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 256;
+    const context = canvas.getContext('2d'), pixels = context.createImageData(256, 256);
+    const random = seededNoise(kind === 'lawn' ? 90210 : 22841);
+    const palette = kind === 'lawn' ? [64, 93, 58] : [113, 105, 91];
+    for (let i = 0; i < pixels.data.length; i += 4) {
+      const x = (i / 4) % 256, stripe = kind === 'lawn' ? Math.sin(x / 15) * 4 : 0;
+      const variation = (random() - .5) * (kind === 'lawn' ? 24 : 34) + stripe;
+      pixels.data[i] = Math.round(palette[0] + variation);
+      pixels.data[i + 1] = Math.round(palette[1] + variation * .85);
+      pixels.data[i + 2] = Math.round(palette[2] + variation * .48);
+      pixels.data[i + 3] = 255;
+    }
+    context.putImageData(pixels, 0, 0);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(kind === 'lawn' ? 9 : 12, kind === 'lawn' ? 9 : 12);
+    texture.anisotropy = renderer?.capabilities.getMaxAnisotropy?.() || 1;
+    return texture;
+  }
+  function addSky() {
+    const sky = new THREE.Mesh(new THREE.SphereGeometry(155, 40, 24), new THREE.ShaderMaterial({
+      side: THREE.BackSide, depthWrite: false,
+      uniforms: { sunDirection: { value: new THREE.Vector3(-.42, .72, .36).normalize() } },
+      vertexShader: 'varying vec3 vDirection; void main(){ vDirection=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+      fragmentShader: `varying vec3 vDirection; uniform vec3 sunDirection;
+        void main(){
+          float height=clamp(vDirection.y*.82+.31,0.,1.);
+          vec3 horizon=vec3(.79,.85,.82), zenith=vec3(.31,.48,.60);
+          vec3 colour=mix(horizon,zenith,smoothstep(.02,.92,height));
+          float glow=pow(max(dot(vDirection,sunDirection),0.),18.);
+          colour+=vec3(.34,.21,.10)*glow;
+          gl_FragColor=vec4(colour,1.);
+        }`
+    }));
+    sky.renderOrder = -10;
+    scene.add(sky);
+  }
+  function addLandscape(bounds) {
+    const groundY = bounds.min.y - .035;
+    const lawnMaterial = new THREE.MeshStandardMaterial({
+      map: groundTexture('lawn'), color: 0xd7e5cf, roughness: .98, metalness: 0
+    });
+    lawnMaterial.map.repeat.set(38, 38);
+    // An oversized lawn avoids a visible diorama edge from every orbit angle.
+    const lawn = new THREE.Mesh(new THREE.PlaneGeometry(480, 480), lawnMaterial);
+    lawn.rotation.x = -Math.PI / 2; lawn.position.set(center.x, groundY, center.z); lawn.receiveShadow = true;
+    scene.add(lawn);
+  }
+
   function motionAllowed() { return !reduced.matches && !document.documentElement.classList.contains('motion-paused'); }
   function requestDraw() {
     if (!ready || lost || !visible || document.hidden || frame) return;
@@ -88,7 +147,7 @@ export function setupHouse360() {
   }
   function cleanScene() {
     controls?.dispose();
-    if(scene) scene.traverse(o=>{if(o.isMesh){o.geometry.dispose();for(const m of [].concat(o.material)){for(const value of Object.values(m))if(value?.isTexture)value.dispose();m.dispose();}}});
+    if(scene) scene.traverse(o=>{if(o.isMesh){o.geometry?.dispose();for(const m of [].concat(o.material || [])){for(const value of Object.values(m))if(value?.isTexture)value.dispose();m.dispose();}}});
     environment?.dispose();renderer?.dispose();renderer?.domElement.remove();
     renderer=null;environment=null;model=null;scene=null;tween=null;
   }
@@ -104,8 +163,7 @@ export function setupHouse360() {
       renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
       const canvas=renderer.domElement;canvas.tabIndex=0;canvas.setAttribute('aria-label','3D-модель дома. Стрелки — вращение и наклон, плюс и минус — масштаб, Home — исходный вид, Escape — прокрутка страницы.');
       viewport.prepend(canvas);
-      scene=new THREE.Scene();scene.background=new THREE.Color('#e9e8df');
-      scene.fog=new THREE.Fog('#e9e8df',80,180);
+      scene=new THREE.Scene();scene.fog=new THREE.Fog('#cbd7d1',56,142);
       camera=new THREE.PerspectiveCamera(38,1,.1,220);
       controls=new OrbitControls(camera,canvas);
       controls.enablePan=false;controls.enableDamping=motionAllowed();controls.dampingFactor=.12;
@@ -118,8 +176,7 @@ export function setupHouse360() {
       const sun=new THREE.DirectionalLight(0xffedcf,2.2);sun.position.set(-16,25,15);sun.castShadow=true;
       sun.shadow.mapSize.set(compact.matches?1024:2048,compact.matches?1024:2048);
       Object.assign(sun.shadow.camera,{left:-20,right:20,top:20,bottom:-20,near:1,far:75});sun.shadow.normalBias=.035;sun.shadow.bias=-.0002;scene.add(sun);
-      const floor=new THREE.Mesh(new THREE.PlaneGeometry(250,250),new THREE.MeshStandardMaterial({color:0xe3e1d5,roughness:.96}));
-      floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;floor.position.y=-.04;scene.add(floor);
+      addSky();
       // Environment is an optional enhancement; geometry remains usable if it is unavailable.
       const hdrTask=new HDRLoader().loadAsync('assets/architecture-environment.hdr').catch(()=>null);
       const gltf=await new GLTFLoader().loadAsync('assets/models/atria-house.glb',e=>{
@@ -137,7 +194,7 @@ export function setupHouse360() {
       }});
       const bounds=new THREE.Box3().setFromObject(model),size=bounds.getSize(new THREE.Vector3());
       bounds.getCenter(center);center.y=bounds.min.y+size.y*.43;
-      floor.position.y=bounds.min.y-.025;
+      addLandscape(bounds);
       homeDistance=Math.max(size.x,size.z)*1.7*(compact.matches?1.25:1);
       controls.target.copy(center);controls.minDistance=Math.max(size.x,size.z)*.8;controls.maxDistance=homeDistance*1.85;
       camera.position.setFromSpherical(new THREE.Spherical(homeDistance,homePhi,homeTheta)).add(center);
