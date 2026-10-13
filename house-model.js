@@ -2,6 +2,7 @@ import * as THREE from './vendor/three.module.js';
 import { OrbitControls } from './vendor/controls/OrbitControls.js';
 import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
 import { HDRLoader } from './vendor/loaders/HDRLoader.js';
+import { addLandscape } from './house-landscape.js?v=realism-1';
 
 // One geometric model, continuously rendered from the visitor's camera.
 export function setupHouse360() {
@@ -19,67 +20,8 @@ export function setupHouse360() {
   let ready = false, loading = false, visible = false, frame = 0, tween = null;
   let activeTouch = false, homeDistance = 30, lost = false, renderCount = 0;
   const center = new THREE.Vector3();
-  const homeTheta = -.55, homePhi = 1.13;
+  const homeTheta = -.55, homePhi = 1.30;
   const viewAngles = {front:[0,1.25], right:[Math.PI/2,1.25], back:[Math.PI,1.25], left:[-Math.PI/2,1.25], top:[homeTheta,.18]};
-
-  function seededNoise(seed) {
-    let value = seed >>> 0;
-    return () => {
-      value = (value * 1664525 + 1013904223) >>> 0;
-      return value / 4294967296;
-    };
-  }
-  function groundTexture(kind) {
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = 256;
-    const context = canvas.getContext('2d'), pixels = context.createImageData(256, 256);
-    const random = seededNoise(kind === 'lawn' ? 90210 : 22841);
-    const palette = kind === 'lawn' ? [64, 93, 58] : [113, 105, 91];
-    for (let i = 0; i < pixels.data.length; i += 4) {
-      const x = (i / 4) % 256, stripe = kind === 'lawn' ? Math.sin(x / 15) * 4 : 0;
-      const variation = (random() - .5) * (kind === 'lawn' ? 24 : 34) + stripe;
-      pixels.data[i] = Math.round(palette[0] + variation);
-      pixels.data[i + 1] = Math.round(palette[1] + variation * .85);
-      pixels.data[i + 2] = Math.round(palette[2] + variation * .48);
-      pixels.data[i + 3] = 255;
-    }
-    context.putImageData(pixels, 0, 0);
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(kind === 'lawn' ? 9 : 12, kind === 'lawn' ? 9 : 12);
-    texture.anisotropy = renderer?.capabilities.getMaxAnisotropy?.() || 1;
-    return texture;
-  }
-  function addSky() {
-    const sky = new THREE.Mesh(new THREE.SphereGeometry(155, 40, 24), new THREE.ShaderMaterial({
-      side: THREE.BackSide, depthWrite: false,
-      uniforms: { sunDirection: { value: new THREE.Vector3(-.42, .72, .36).normalize() } },
-      vertexShader: 'varying vec3 vDirection; void main(){ vDirection=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
-      fragmentShader: `varying vec3 vDirection; uniform vec3 sunDirection;
-        void main(){
-          float height=clamp(vDirection.y*.82+.31,0.,1.);
-          vec3 horizon=vec3(.79,.85,.82), zenith=vec3(.31,.48,.60);
-          vec3 colour=mix(horizon,zenith,smoothstep(.02,.92,height));
-          float glow=pow(max(dot(vDirection,sunDirection),0.),18.);
-          colour+=vec3(.34,.21,.10)*glow;
-          gl_FragColor=vec4(colour,1.);
-        }`
-    }));
-    sky.renderOrder = -10;
-    scene.add(sky);
-  }
-  function addLandscape(bounds) {
-    const groundY = bounds.min.y - .035;
-    const lawnMaterial = new THREE.MeshStandardMaterial({
-      map: groundTexture('lawn'), color: 0xd7e5cf, roughness: .98, metalness: 0
-    });
-    lawnMaterial.map.repeat.set(38, 38);
-    // An oversized lawn avoids a visible diorama edge from every orbit angle.
-    const lawn = new THREE.Mesh(new THREE.PlaneGeometry(480, 480), lawnMaterial);
-    lawn.rotation.x = -Math.PI / 2; lawn.position.set(center.x, groundY, center.z); lawn.receiveShadow = true;
-    scene.add(lawn);
-  }
 
   function motionAllowed() { return !reduced.matches && !document.documentElement.classList.contains('motion-paused'); }
   function requestDraw() {
@@ -147,6 +89,7 @@ export function setupHouse360() {
   }
   function cleanScene() {
     controls?.dispose();
+    if(scene?.background?.isTexture)scene.background.dispose();
     if(scene) scene.traverse(o=>{if(o.isMesh){o.geometry?.dispose();for(const m of [].concat(o.material || [])){for(const value of Object.values(m))if(value?.isTexture)value.dispose();m.dispose();}}});
     environment?.dispose();renderer?.dispose();renderer?.domElement.remove();
     renderer=null;environment=null;model=null;scene=null;tween=null;
@@ -159,12 +102,12 @@ export function setupHouse360() {
       cleanScene();
       renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
       renderer.outputColorSpace=THREE.SRGBColorSpace;
-      renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.95;
+      renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.82;
       renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.shadowMap.autoUpdate=false;
       const canvas=renderer.domElement;canvas.tabIndex=0;canvas.setAttribute('aria-label','3D-модель дома. Стрелки — вращение и наклон, плюс и минус — масштаб, Home — исходный вид, Escape — прокрутка страницы.');
       viewport.prepend(canvas);
-      scene=new THREE.Scene();scene.fog=new THREE.Fog('#cbd7d1',56,142);
-      camera=new THREE.PerspectiveCamera(38,1,.1,220);
+      scene=new THREE.Scene();scene.background=new THREE.Color('#c1d0d8');scene.fog=new THREE.Fog('#7e8b79',65,200);
+      camera=new THREE.PerspectiveCamera(38,1,.1,650);
       controls=new OrbitControls(camera,canvas);
       controls.enablePan=false;controls.enableDamping=motionAllowed();controls.dampingFactor=.12;
       controls.rotateSpeed=.65;controls.zoomSpeed=.7;controls.minPolarAngle=.08;controls.maxPolarAngle=1.48;
@@ -172,11 +115,10 @@ export function setupHouse360() {
       canvas.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey)e.stopImmediatePropagation();},{capture:true,passive:true});
       controls.addEventListener('start',()=>{tween=null;selectPreset('');canvas.focus({preventScroll:true});});
       controls.addEventListener('change',requestDraw);
-      const sky=new THREE.HemisphereLight(0xe5edee,0x7f7566,.75);scene.add(sky);
-      const sun=new THREE.DirectionalLight(0xffedcf,2.2);sun.position.set(-16,25,15);sun.castShadow=true;
+      const sky=new THREE.HemisphereLight(0xe3efff,0x65604a,.4);scene.add(sky);
+      const sun=new THREE.DirectionalLight(0xffeed8,2.6);sun.position.set(-16,25,15);sun.castShadow=true;
       sun.shadow.mapSize.set(compact.matches?1024:2048,compact.matches?1024:2048);
-      Object.assign(sun.shadow.camera,{left:-20,right:20,top:20,bottom:-20,near:1,far:75});sun.shadow.normalBias=.035;sun.shadow.bias=-.0002;scene.add(sun);
-      addSky();
+      Object.assign(sun.shadow.camera,{left:-20,right:20,top:20,bottom:-20,near:1,far:75});sun.shadow.normalBias=.015;sun.shadow.bias=-.0001;sun.shadow.radius=3;sun.shadow.blurSamples=6;scene.add(sun);
       // Environment is an optional enhancement; geometry remains usable if it is unavailable.
       const hdrTask=new HDRLoader().loadAsync('assets/architecture-environment.hdr').catch(()=>null);
       const gltf=await new GLTFLoader().loadAsync('assets/models/atria-house.glb',e=>{
@@ -186,21 +128,23 @@ export function setupHouse360() {
       model.traverse(o=>{if(o.isMesh){
         const glass=/glass|glazing/i.test(o.material?.name||'');
         o.castShadow=!glass;o.receiveShadow=!glass;
-        if(o.material){o.material.envMapIntensity=.65;
+        if(o.material){o.material.envMapIntensity=.8;
           // Thin architectural panes need transparency and reflections, not an
           // extra full-scene refraction pass on every gesture.
-          if(glass){o.material.transmission=0;o.material.transparent=true;o.material.opacity=.23;o.material.depthWrite=false;o.material.roughness=.12;o.material.envMapIntensity=.9;o.material.needsUpdate=true;}
+          if(glass){o.material.transmission=0;o.material.transparent=true;o.material.opacity=.48;o.material.depthWrite=false;o.material.color.set('#b7c9c6');o.material.roughness=.075;o.material.envMapIntensity=1.35;o.material.needsUpdate=true;}
+          if(/graphite|aluminium/i.test(o.material.name)){o.material.color.set('#383c39');o.material.metalness=.55;o.material.roughness=.48;}
+          if(/concrete/i.test(o.material.name)){o.material.color.set('#b7b3a6');o.material.roughness=.9;}
         }
       }});
       const bounds=new THREE.Box3().setFromObject(model),size=bounds.getSize(new THREE.Vector3());
       bounds.getCenter(center);center.y=bounds.min.y+size.y*.43;
-      addLandscape(bounds);
+      const garden=await addLandscape(scene,renderer,bounds,compact.matches);viewport.dataset.landscape=garden.userData.ready?'ready':'fallback';
       homeDistance=Math.max(size.x,size.z)*1.7*(compact.matches?1.25:1);
       controls.target.copy(center);controls.minDistance=Math.max(size.x,size.z)*.8;controls.maxDistance=homeDistance*1.85;
       camera.position.setFromSpherical(new THREE.Spherical(homeDistance,homePhi,homeTheta)).add(center);
       controls.update();resize();
       const hdr=await hdrTask;
-      if(hdr){hdr.mapping=THREE.EquirectangularReflectionMapping;const pmrem=new THREE.PMREMGenerator(renderer);environment=pmrem.fromEquirectangular(hdr);scene.environment=environment.texture;pmrem.dispose();hdr.dispose();}
+      if(hdr){hdr.mapping=THREE.EquirectangularReflectionMapping;const pmrem=new THREE.PMREMGenerator(renderer);environment=pmrem.fromEquirectangular(hdr);scene.environment=environment.texture;scene.background=hdr;scene.backgroundBlurriness=.012;scene.backgroundIntensity=1.15;scene.environmentIntensity=.8;pmrem.dispose();}
       loading=false;ready=true;viewport.dataset.state='ready';viewport.dataset.renderer='webgl';
       renderer.shadowMap.needsUpdate=true;viewport.querySelector('img').hidden=true;overlay.hidden=true;
       document.querySelector('#house360Controls').hidden=false;presets.forEach(b=>b.disabled=false);

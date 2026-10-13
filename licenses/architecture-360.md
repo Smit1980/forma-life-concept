@@ -1,5 +1,11 @@
 # Architecture 360 — asset provenance
 
+## Landscape realism edition (13 October 2026)
+
+The viewer now uses local 1K Grass001 color, OpenGL normal and roughness maps from ambientCG, desaturated Gravel Road maps and the Shrub 01 g/LOD3 model by Rico Cilliers from Poly Haven. All are CC0; the item pages and licence pages below were checked on 13 October 2026. The existing Kloofendal HDR is used for the visible sky as well as reflections. No new external runtime service or package was added.
+
+The files in `assets/landscape/` were prepared from the existing project sources with `tools/prepare_realism_assets.py` in the parent workspace. The plant uses an alpha-tested material with depth writing; instances share one geometry and texture. Desktop uses 21 plants, narrow screens use 12, with reduced terrain resolution and fewer grass blades. Surface maps have flat-colour fallbacks if unavailable. The landscape is illustrative, not a survey of a real plot.
+
 ## Interactive model edition (12 October 2026)
 
 The current site uses `assets/models/atria-house.glb`, exported from the authored Blender scene, and a real Three.js WebGL camera. Geometry, UVs and physically based materials are in the GLB; no frame sequence or video is used by the interactive viewer. The HDR environment is the CC0 Kloofendal source listed below. Three.js r180 and its OrbitControls, GLTFLoader, HDRLoader and BufferGeometryUtils addons are shipped locally under `licenses/three-MIT.txt`. Source: https://github.com/mrdoob/three.js/tree/r180
