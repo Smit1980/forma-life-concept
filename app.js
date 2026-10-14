@@ -46,7 +46,7 @@ document.addEventListener('click',e=>{
 $('#requestConfiguration').onclick=()=>{selection.project='Атриа / Архитектурный концепт 360°';selection.facade=null;selection.light=null;goContact()};
 const modelSection=document.querySelector('#experience');
 if(modelSection){
- const bootModel=()=>import('./house-model.js?v=realism-1').then(({setupHouse360})=>setupHouse360()).catch(error=>{console.warn('Обзор недоступен:',error.message);const status=document.querySelector('#house360Loading'),retry=document.querySelector('#house360Retry');if(status)status.textContent='3D сейчас недоступно. Повторите загрузку.';if(retry){retry.hidden=false;retry.onclick=bootModel;}});
+ const bootModel=()=>import('./house-model.js?v=atelier-1').then(({setupHouse360})=>setupHouse360()).catch(error=>{console.warn('Обзор недоступен:',error.message);const status=document.querySelector('#house360Loading'),retry=document.querySelector('#house360Retry');if(status)status.textContent='3D сейчас недоступно. Повторите загрузку.';if(retry){retry.hidden=false;retry.onclick=bootModel;}});
  const modelObserver=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)){modelObserver.disconnect();bootModel();}},{rootMargin:'400px'});modelObserver.observe(modelSection);
 }
 $('#channel').onchange=()=>{const input=$('#leadForm').elements.contact;const tg=$('#channel').value==='Telegram';input.placeholder=tg?'@username или номер телефона':'+7 900 000-00-00';input.inputMode=tg?'text':'tel';input.setCustomValidity('')};

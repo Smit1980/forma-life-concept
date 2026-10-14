@@ -68,7 +68,7 @@ export function setupHouse360() {
     if (controls) controls.enabled = !compact.matches || on;
     viewport.classList.toggle('touch-active',on);
     if (renderer) renderer.domElement.style.touchAction = compact.matches&&!on?'pan-y':'none';
-    touchButton.textContent = on?'Готово · листать страницу':'Вращать дом';
+    touchButton.textContent = on?'Готово · листать страницу':'Обзор 360';
     touchButton.setAttribute('aria-pressed',String(on));
   }
   function resize() {
