@@ -122,7 +122,9 @@ export function setupHouse360() {
       // Environment is an optional enhancement; geometry remains usable if it is unavailable.
       const hdrTask=new HDRLoader().loadAsync('assets/architecture-environment.hdr').catch(()=>null);
       const gltf=await new GLTFLoader().loadAsync('assets/models/atria-house.glb',e=>{
-        document.querySelector('#house360Loading').textContent=e.total?`Загружаем 3D-модель · ${Math.round(e.loaded/e.total*100)}%`:'Загружаем 3D-модель…';
+        // ProgressEvent can report more loaded bytes than its estimated total.
+        const percent=e.total>0?Math.min(100,Math.max(0,Math.round(e.loaded/e.total*100))):null;
+        document.querySelector('#house360Loading').textContent=percent===null?'Загружаем 3D-модель…':`Загружаем 3D-модель · ${percent}%`;
       });
       model=gltf.scene;scene.add(model);
       model.traverse(o=>{if(o.isMesh){
